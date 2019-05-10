@@ -108,10 +108,12 @@ public:
 	~Terminal() = default;
 
 
-	fs::path cd_util( const std::string& pat );
-	void cd( const std::string& pat );
+	fs::path cd_util( const std::string& flag, const std::string& pat );
+	void cd( const std::string& flag, const std::string& path );
 	void clear() const;
-	bool check_arguments( const std::string& cmd, const std::string& flag, const std::string& path ) const;
+	bool check_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const;
+	//bool check_ls_args( const std::string& flag, const std::string& path ) const;
+	//bool check_cd_args( const std::string& flag, const std::string& path ) const;
 	uintmax_t directory_size( const fs::path& path ) const;
 	void ls( const std::string& flag, const std::string& path );
 	void ls_all( const std::string& path );
@@ -134,11 +136,10 @@ private:
 	};
 	std::unordered_map< std::string, std::function<void( std::string )> > callback_one_arg {
 		{"mkdir",[this]( const std::string& path) { return mkdir( path ); }},
-		{"rmdir",[this]( const std::string& path ) { return rmdir( path ); }},
-		//{"ls",[this](const std::string& path) { return ls( path ); }},
-		{"cd",[this]( const std::string& path) { return cd( path ); }}
+		{"rmdir",[this]( const std::string& path ) { return rmdir( path ); }}
 	};
 	std::unordered_map< std::string, std::function<void( std::string, std::string )> > callback_two_arg {
+		{"cd",[this]( const std::string& flag, const std::string& path ) { return cd( flag, path ); }},
 		{"ls",[this]( const std::string& flag, const std::string& path ) { return ls( flag, path ); }}
 	};
 	InputHandler		_input_handler;

@@ -11,7 +11,7 @@ Command syntax is similar to bash syntax.
 ``` bash
 clear - clears the terminal window
 pwd - prints working directory
-cd dir - change directory
+cd (-fc) dir - change directory, with -fc changes directory to the last existing in path, without -fc stays in the original
 ls (-all) (dir) - prints list of files in dir, with -all also prints size, permissions, date created
 mkdir dir - creates new directory 
 rmdir dir - removes existing directory

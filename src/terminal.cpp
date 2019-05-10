@@ -3,58 +3,82 @@
 namespace fs = std::experimental::filesystem;
 
 
-fs::path Terminal::cd_util( const std::string& path_str ) {
-	std::vector<std::string> path_split = split_path( path_str, "/" );
-	auto tmp = _path;
+fs::path Terminal::cd_util( const std::string& flag, const std::string& path_str ) {
 
-	for ( const auto& path : path_split ) {
+	if ( !check_arguments( { "cd","-fc" }, flag, path_str ) ) { return _path; }
+
+	fs::path new_path = _path;
+	const std::string path_to_split = path_str.empty() ? flag : path_str;
+	std::vector<std::string> path_split = split_path( path_to_split, "/" );
+	for ( const auto& folder : path_split ) {
 		// self directory
-		if ( path == "." ) { continue; }
+		if ( folder == "." ) { continue; }
 
 		// parent directory
-		else if ( path == ".." ) {
-			tmp = tmp.parent_path();
+		else if ( folder == ".." ) {
+			if ( fs::exists( new_path.parent_path() ) ) {
+				new_path = new_path.parent_path();
+			}
 		}
 		// given path not found
-		else if ( !fs::exists( tmp / path ) ) {
-			std::cout << "cd: " << path << " - no such file or directory\n";
-			return tmp;
+		else if ( fs::exists( new_path / folder ) ) {
+			new_path /= folder;
 		}
 		else { 
-			tmp /= path;
+			if ( flag == "-fc" ) {
+				std::cout << "cd: " << folder << " - no such file or directory\n";
+				return new_path;
+			}
+			std::cout << "cd: " << path_to_split << " - no such file or directory\n";
+			return _path;
 		}
 	}
-	return tmp;
+
+	return new_path;
 }
 
-void Terminal::cd( const std::string& pat ) {
-	_path = cd_util( pat );
+void Terminal::cd( const std::string& flag, const std::string& path ) {
+	_path = cd_util( flag, path );
 }
 
 void Terminal::clear() const {
 	std::system( "cls" );
 }
 
-bool Terminal::check_arguments( const std::string& cmd, const std::string& flag, const std::string& path ) const {
-	if ( cmd == "ls" ) {
-		if ( starts_with( flag, "-" ) && starts_with( path, "-" ) ) {
-			std::cout << "ls -> Wrong arguments - both are flags\n";
-			return false;
-		}
+bool Terminal::check_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const {
+	// Both arguments start with -
+	// ls -f1 -f2
+	if ( starts_with( flag, "-" ) && starts_with( path, "-" ) ) {
+		std::cout << cmd.first << " -> Wrong arguments - both are flags\n";
+		return false;
+	}
 
-		if ( !starts_with( flag, "-" ) && starts_with( path, "-" ) ) {
-			std::cout << "ls -> Wrong arguments - first must be FLAG second PATH\n";
-			return false;
-		}
-		if ( !path.empty() && 
-			 !starts_with( flag, "-" ) && !starts_with( path, "-" ) ) {
-			std::cout << "ls -> Wrong arguments - both are PATHS\n";
-			return false;
-		}
-		return true;
+	// ls f1 -f2
+	if ( !starts_with( flag, "-" ) && starts_with( path, "-" ) ) {
+		std::cout << cmd.first << " -> Wrong arguments - first must be FLAG second PATH\n";
+		return false;
+	}
+
+	// Neither one stars with -
+	// ls f1 f2
+	if ( !path.empty() &&
+		 !starts_with( flag, "-" ) && !starts_with( path, "-" ) ) {
+		std::cout << cmd.first << " -> Wrong arguments - both are PATHS\n";
+		return false;
+	}
+
+	// Corrected order but wrong flag
+	// ls -a p
+	// ls -a
+	if ( (!path.empty() && !flag.empty() && flag != cmd.second)
+		 || (path.empty() && !flag.empty() && starts_with( flag, "-" ) && flag != cmd.second) ) {
+		std::cout << cmd.first << " -> Wrong flag - flags available : '" << cmd.second <<"' \n";
+		return false;
 	}
 	return true;
 }
+
+
 
 uintmax_t Terminal::directory_size( const fs::path& path ) const {
 	uintmax_t total_size = 0;
@@ -67,7 +91,7 @@ uintmax_t Terminal::directory_size( const fs::path& path ) const {
 }
 
 void Terminal::ls( const std::string& flag, const std::string& path ) {
-	if ( !check_arguments( "ls", flag, path ) ) { return; }
+	if ( !check_arguments( {"ls","-all"}, flag, path ) ) { return; }
 	fs::path new_path = _path;
 	
 	// ls PATH
@@ -78,7 +102,7 @@ void Terminal::ls( const std::string& flag, const std::string& path ) {
 	if ( flag == "-all" ) {
 		// ls -all path
 		if ( !path.empty() ) {
-			ls_all( cd_util( path ).string() );
+			ls_all( cd_util( "", path ).string() );
 			return;
 		}
 		// ls -all
