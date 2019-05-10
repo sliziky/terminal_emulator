@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <experimental/filesystem>  
-#include "Terminal.h"
+#include "../include/Terminal.h"
 
 int main() {
 	Terminal t(std::experimental::filesystem::current_path());

@@ -14,3 +14,7 @@ inline std::vector<std::string> split_path( std::string s, const std::string& de
 	}
 	return splitted;
 }
+
+inline bool starts_with( const std::string& s, const std::string& prefix ) {
+	return  s.rfind( prefix, 0 ) == 0;
+}

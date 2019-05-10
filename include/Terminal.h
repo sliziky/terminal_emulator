@@ -62,7 +62,6 @@ private:
 	given input and stuff about
 	*/
 	struct InputHandler {
-		using Arguments = std::unordered_map < std::string, std::vector<std::string >>;
 
 		void get_line() {
 			line_split.clear();
@@ -111,11 +110,11 @@ public:
 
 	fs::path cd_util( const std::string& pat );
 	void cd( const std::string& pat );
-
 	void clear() const;
+	bool check_arguments( const std::string& cmd, const std::string& flag, const std::string& path ) const;
 	uintmax_t directory_size( const fs::path& path ) const;
-	void ls( const std::string& flag );
-	void ls_all();
+	void ls( const std::string& flag, const std::string& path );
+	void ls_all( const std::string& path );
 	void mkdir(  const std::string& path ) const;
 	void print_size_name( const fs::directory_entry& file );
 	void print_time( const fs::directory_entry& file ) const;
@@ -134,10 +133,13 @@ private:
 		{"clear",[this]() { return clear(); }}
 	};
 	std::unordered_map< std::string, std::function<void( std::string )> > callback_one_arg {
-		{"mkdir",[this]( const std::string& path) { return mkdir(path); }},
+		{"mkdir",[this]( const std::string& path) { return mkdir( path ); }},
 		{"rmdir",[this]( const std::string& path ) { return rmdir( path ); }},
-		{"ls",[this](const std::string& flag) { return ls(flag); }},
+		//{"ls",[this](const std::string& path) { return ls( path ); }},
 		{"cd",[this]( const std::string& path) { return cd( path ); }}
+	};
+	std::unordered_map< std::string, std::function<void( std::string, std::string )> > callback_two_arg {
+		{"ls",[this]( const std::string& flag, const std::string& path ) { return ls( flag, path ); }}
 	};
 	InputHandler		_input_handler;
 	fs::path			_path;
