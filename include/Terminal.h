@@ -23,6 +23,8 @@
 namespace fs = std::experimental::filesystem;
 
 
+
+
 class Terminal {
 
 private:
@@ -111,9 +113,7 @@ public:
 	fs::path cd_util( const std::string& flag, const std::string& pat );
 	void cd( const std::string& flag, const std::string& path );
 	void clear() const;
-	bool check_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const;
-	//bool check_ls_args( const std::string& flag, const std::string& path ) const;
-	//bool check_cd_args( const std::string& flag, const std::string& path ) const;
+	bool has_correct_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const;
 	uintmax_t directory_size( const fs::path& path ) const;
 	void ls( const std::string& flag, const std::string& path );
 	void ls_all( const std::string& path );

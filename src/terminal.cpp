@@ -1,11 +1,11 @@
 #include "../include/Terminal.h"
 #include "../include/colors.h"
-namespace fs = std::experimental::filesystem;
 
+namespace fs = std::experimental::filesystem;
 
 fs::path Terminal::cd_util( const std::string& flag, const std::string& path_str ) {
 
-	if ( !check_arguments( { "cd","-fc" }, flag, path_str ) ) { return _path; }
+	if ( !has_correct_arguments( { "cd","-fc" }, flag, path_str ) ) { return _path; }
 
 	fs::path new_path = _path;
 	const std::string path_to_split = path_str.empty() ? flag : path_str;
@@ -45,7 +45,7 @@ void Terminal::clear() const {
 	std::system( "cls" );
 }
 
-bool Terminal::check_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const {
+bool Terminal::has_correct_arguments( const std::pair<std::string, std::string>& cmd, const std::string& flag, const std::string& path ) const {
 	// Both arguments start with -
 	// ls -f1 -f2
 	if ( starts_with( flag, "-" ) && starts_with( path, "-" ) ) {
@@ -91,7 +91,7 @@ uintmax_t Terminal::directory_size( const fs::path& path ) const {
 }
 
 void Terminal::ls( const std::string& flag, const std::string& path ) {
-	if ( !check_arguments( {"ls","-all"}, flag, path ) ) { return; }
+	if ( !has_correct_arguments( {"ls","-all"}, flag, path ) ) { return; }
 	fs::path new_path = _path;
 	
 	// ls PATH
@@ -176,8 +176,8 @@ void Terminal::print_size_name( const fs::directory_entry& file ) {
 		font_color = (WORD)Colors::red;
 	}
 
-	if ( size >= 1024 ) {
-		size /= 1024;
+	if ( size >= 1_kB ) {
+		size /= 1_kB;
 		type = " kB ";
 	}
 	std::cout << std::right << std::setw( 7 ) << size << std::left << std::setw( 2 ) << type;
@@ -225,8 +225,9 @@ void Terminal::rmdir( const std::string & path ) const {
 }
 
 void Terminal::run() {
+
 	for ( ;; ) {
-		std::cout << _path.string() << " ~ ";
+		std::cout << _path.string() << "$ ~ ";
 		Command command = _input_handler.get_command();
 		auto cmd = callback_no_arg.find( command.first );
 		if ( cmd != callback_no_arg.end() ) {
