@@ -12,8 +12,7 @@ Command syntax is similar to bash syntax.
 clear - clears the terminal window
 pwd - prints working directory
 cd dir - change directory
-ls (dir) - prints list of files in dir
-ls -all (dir) - prints list of files including size, date created etc
+ls (-all) (dir) - prints list of files in dir, with -all also prints size, permissions, date created
 mkdir dir - creates new directory 
 rmdir dir - removes existing directory
 ```
